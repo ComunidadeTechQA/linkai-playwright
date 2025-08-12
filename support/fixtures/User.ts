@@ -1,17 +1,11 @@
 import { faker } from '@faker-js/faker'
 
-export interface UserSignup {
+export interface User {
     name: string
     username: string
     email: string
     password: string
     confirmPassword: string
-}
-
-export interface UserLogin {
-    name: string
-    username: string
-    password: string
 }
 
 export function getFakeUser() {
@@ -38,37 +32,38 @@ export function getNewUser() {
     }
 }
 
+export function getDuplicateUser() {
+    const defaultPassword = 'pwd123'
 
-export const Users = {
-    validUser: {
-        name: 'Fernando',
-        username: 'papito',
-        password: 'pwd123'
-    },
-    wrongPassword: {
-        name: 'Fernando',
-        username: 'papito',
-        password: '123456'
-    },
-    userNotFound: {
-        name: 'Fernando',
-        username: 'not-found',
-        password: '123456'
-    },
-    emptyFields: {
-        name: 'Fernando',
-        username: '',
-        password: ''
-    },
-    missingUsername: {
-        name: 'Fernando',
-        username: '',
-        password: 'pwd123'
-    },
-    missingPassword: {
-        name: 'Fernando',
-        username: 'papito',
-        password: ''
+    return {
+        name: 'Bruno',
+        username: 'bruno',
+        email: 'bruno@bruno.dev',
+        password: defaultPassword,
+        confirmPassword: defaultPassword
     }
 }
 
+export function getLoginUser() {
+    const defaultPassword = 'pwd123'
+
+    return {
+        name: 'Fernando Papito',
+        username: 'papito',
+        email: 'papito@link.ai',
+        password: defaultPassword,
+        confirmPassword: defaultPassword
+    }
+}
+
+export function getTempUser() {
+    const defaultPassword = 'pwd123'
+
+    return {
+        name: 'Camila dos Santos',
+        username: 'camila',
+        email: 'camila@link.ai',
+        password: defaultPassword,
+        confirmPassword: defaultPassword
+    }
+}

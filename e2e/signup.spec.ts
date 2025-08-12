@@ -1,46 +1,87 @@
-import { test, expect } from '@playwright/test'
+import { test } from '@playwright/test'
 
-import { getSignupPage } from '../support/pages/SignupPage'
-import { getDashPage } from '../support/pages/DashPage'
-import { getToast } from '../support/pages/components/Toast'
+import { getToast } from '../support/actions/components/Toast'
 
-import { removeUserByEmail } from '../support/database'
+import { getAuthActions } from '../support/actions/auth'
 
-import { UserSignup, getNewUser } from '../support/fixtures/User'
+import { removeUserByEmail, insertUser, removeUserByUserName } from '../support/database'
+
+import { User, getNewUser, getDuplicateUser } from '../support/fixtures/User'
 
 test('deve cadastrar um novo usuário com sucesso', async ({ page }) => {
 
-    const signupPage = getSignupPage(page)
-    const dashPage = getDashPage(page)
+    const auth = getAuthActions(page)
     const toast = getToast(page)
 
-    const user: UserSignup = getNewUser()
+    const user: User = getNewUser()
     await removeUserByEmail(user.email)
 
-    await signupPage.open()
-    await signupPage.fill(user)
-    await signupPage.submit()
+    await auth.navigateToSignup()
+    await auth.fillSignupForm(user)
+    await auth.submitSignupForm()
+    await auth.verifyUserLogin(user)
 
-    await expect(dashPage.welcome()).toContainText(`Olá, ${user.name}! 👋`)
-    await expect(toast.element()).toContainText('Conta criada com sucesso!')
-    await expect(toast.element()).toContainText('Bem-vindo ao Linkaí. Agora você pode criar seu perfil.')
+    await toast.haveText(
+        'Conta criada com sucesso!',
+        'Bem-vindo ao Linkaí. Agora você pode criar seu perfil.'
+    )
+})
+
+test('não deve cadastrar quando o email já estiver em uso', async ({ page }) => {
+
+    const auth = getAuthActions(page)
+    const toast = getToast(page)
+
+    const user: User = getDuplicateUser()
+    await removeUserByEmail(user.email)
+    await insertUser(user)
+
+    await auth.navigateToSignup()
+    await auth.fillSignupForm({ ...user, username: 'bruno123' })
+    await auth.submitSignupForm()
+
+    await toast.haveText(
+        'Oops!',
+        'Parece que esse e-mail ou nome de usuário já foi cadastrado. Tente outro, por favor.'
+    )
+})
+
+test('não deve cadastrar quando o username já estiver em uso', async ({ page }) => {
+
+    const auth = getAuthActions(page)
+    const toast = getToast(page)
+
+    const user: User = getDuplicateUser()
+    await removeUserByUserName(user.username)
+    await insertUser(user)
+
+    await auth.navigateToSignup()
+    await auth.fillSignupForm({ ...user, email: 'bruno@teste.com.br' })
+    await auth.submitSignupForm()
+
+    await toast.haveText(
+        'Oops!',
+        'Parece que esse e-mail ou nome de usuário já foi cadastrado. Tente outro, por favor.'
+    )
 })
 
 test('não deve cadastrar quando nenhum campo é informando', async ({ page }) => {
-    const signupPage = getSignupPage(page)
+    const auth = getAuthActions(page)
     const toast = getToast(page)
 
-    await signupPage.open()
-    await signupPage.submit()
+    await auth.navigateToSignup()
+    await auth.submitSignupForm()
 
-    await expect(toast.element()).toContainText('Campos obrigatórios')
-    await expect(toast.element()).toContainText('Por favor, preencha todos os campos.')
+    await toast.haveText(
+        'Campos obrigatórios',
+        'Por favor, preencha todos os campos.'
+    )
 })
 
 test('não deve cadastrar quando o email for incorreto', async ({ page }) => {
-    const signupPage = getSignupPage(page)
+    const auth = getAuthActions(page)
 
-    const user: UserSignup = {
+    const user: User = {
         name: 'Fernando',
         username: 'fernando',
         email: 'www.teste.com.br',
@@ -48,18 +89,18 @@ test('não deve cadastrar quando o email for incorreto', async ({ page }) => {
         confirmPassword: 'abc123'
     }
 
-    await signupPage.open()
-    await signupPage.fill(user)
-    await signupPage.submit()
+    await auth.navigateToSignup()
+    await auth.fillSignupForm(user)
+    await auth.submitSignupForm()
 
-    await signupPage.validateEmailFieldType()
+    await auth.validateEmailFieldType()
 })
 
 test('não deve cadastrar quando o username é incorreto', async ({ page }) => {
-    const signupPage = getSignupPage(page)
+    const auth = getAuthActions(page)
     const toast = getToast(page)
 
-    const user: UserSignup = {
+    const user: User = {
         name: 'Fernando',
         username: 'fernando&papito',
         email: 'papito@papito.com.br',
@@ -67,19 +108,21 @@ test('não deve cadastrar quando o username é incorreto', async ({ page }) => {
         confirmPassword: 'abc123'
     }
 
-    await signupPage.open()
-    await signupPage.fill(user)
-    await signupPage.submit()
+    await auth.navigateToSignup()
+    await auth.fillSignupForm(user)
+    await auth.submitSignupForm()
 
-    await expect(toast.element()).toContainText('Username inválido')
-    await expect(toast.element()).toContainText('O username deve conter apenas letras, números e underscores.')
+    await toast.haveText(
+        'Username inválido',
+        'O username deve conter apenas letras, números e underscores.'
+    )
 })
 
 test('não deve cadastrar as senhas não são iguais', async ({ page }) => {
-    const signupPage = getSignupPage(page)
+    const auth = getAuthActions(page)
     const toast = getToast(page)
 
-    const user: UserSignup = {
+    const user: User = {
         name: 'Fernando',
         username: 'fernando_papito',
         email: 'papito@papito.com.br',
@@ -87,10 +130,12 @@ test('não deve cadastrar as senhas não são iguais', async ({ page }) => {
         confirmPassword: '123pwd'
     }
 
-    await signupPage.open()
-    await signupPage.fill(user)
-    await signupPage.submit()
+    await auth.navigateToSignup()
+    await auth.fillSignupForm(user)
+    await auth.submitSignupForm()
 
-    await expect(toast.element()).toContainText('Senhas não coincidem')
-    await expect(toast.element()).toContainText('A confirmação de senha deve ser igual à senha.')
+    await toast.haveText(
+        'Senhas não coincidem',
+        'A confirmação de senha deve ser igual à senha.'
+    )
 })
