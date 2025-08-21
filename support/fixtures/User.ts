@@ -5,7 +5,13 @@ export interface User {
     username: string
     email: string
     password: string
-    confirmPassword: string
+    confirmPassword: string,
+    links?: Link[]
+}
+
+export interface Link {
+    title: string
+    url: string
 }
 
 export function getFakeUser() {
@@ -56,7 +62,7 @@ export function getLoginUser() {
     }
 }
 
-export function getTempUser() {
+export function getUserWithLink() {
     const defaultPassword = 'pwd123'
 
     return {
@@ -64,6 +70,28 @@ export function getTempUser() {
         username: 'camila',
         email: 'camila@link.ai',
         password: defaultPassword,
-        confirmPassword: defaultPassword
+        confirmPassword: defaultPassword,
+        links: [{
+            title: 'Meus Cursos', url: 'https://camila.dev/cursos'
+        }]
+    }
+}
+
+export function getUserWithLinks() {
+    const defaultPassword = 'pwd123'
+
+    return {
+        name: 'Papito Fernando',
+        username: 'papitofernando',
+        email: 'eu@papito.dev',
+        password: defaultPassword,
+        confirmPassword: defaultPassword,
+        links: [
+            { title: 'Meus Cursos', url: 'https://papito.dev/cursos', },
+            { title: 'Meu Blog', url: 'https://papito.dev/blog', },
+            { title: 'Fale Comigo', url: 'https://papito.dev/contato', },
+            { title: 'Minhas Musicas', url: 'https://papito.dev/playlist', },
+            { title: 'Outro Link', url: 'https://papito.dev/outro-link', }
+        ]
     }
 }
