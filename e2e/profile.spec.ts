@@ -12,7 +12,7 @@ test.describe.serial('Perfil do usuário', () => {
     })
 
     test('Deve exibir os meus links no meu perfil', async ({ page }) => {
-        await page.goto(`http://localhost:3000/${profile.user.username}`)
+        await page.goto(`/${profile.user.username}`)
         // Checkpoint
         await expect(page.getByRole('heading', { name: profile.user.name })).toBeVisible()
 
@@ -25,7 +25,7 @@ test.describe.serial('Perfil do usuário', () => {
 
 
     test('Deve exibir as redes sociais do meu perfil', async ({ page }) => {
-        await page.goto(`http://localhost:3000/${profile.user.username}`)
+        await page.goto(`/${profile.user.username}`)
         // Checkpoint
         await expect(page.getByRole('heading', { name: profile.user.name })).toBeVisible()
 

@@ -25,7 +25,7 @@ export function getLinkActions(page: Page) {
 
             await page
                 .getByRole('button', { name: 'Adicionar Link' })
-                .click()
+                .click({ force: true })
         }
     }
 }
